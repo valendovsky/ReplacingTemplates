@@ -17,11 +17,14 @@
 #include <fstream>
 #include <mutex>
 #include <filesystem>
+#include <vector>
 
 
 
 // Адрес конфигурационного файла
 const char* g_configFile = "config.txt";
+// Псевдоним типа строки с адресом файла для замены
+using pathString = std::u8string;
 
 // Мютексы
 std::mutex stdOutMtx; // для работы с std::cout
@@ -78,6 +81,24 @@ short getConfig(std::string& directoryName, std::map<std::string, std::string>& 
     return countThread;
 }
 
+// Рекурсивно обходит директорию и получает адреса всех файлов
+// filePath - параметр вывода
+void getFiles(const std::string& directoryName, std::vector<pathString>& filePath)
+{
+    std::filesystem::path catalog(directoryName);
+    for (const auto& element : std::filesystem::recursive_directory_iterator(catalog))
+    {
+        std::filesystem::path file = element.path();
+
+        // Если отсутствует расширение, считаем каталогом, а не файлом
+        if (file.extension() != "")
+        {
+            filePath.push_back(file.u8string());
+        }
+    }
+}
+
+
 int main()
 {
     std::cout << "The program is running.\n";
@@ -109,6 +130,11 @@ int main()
         std::cin.get();
         return -1;
     }
+
+    // Получаем адреса всех файлов в каталоге
+    std::vector<pathString> filesName;
+    getFiles(directoryName, filesName);
+
 
 
     return 0;
