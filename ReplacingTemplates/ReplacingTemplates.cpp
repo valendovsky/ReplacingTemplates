@@ -18,6 +18,7 @@
 #include <mutex>
 #include <filesystem>
 #include <vector>
+#include <regex>
 
 
 
@@ -126,6 +127,25 @@ bool readFile(const pathString& fileName, std::string& textFile)
     return true;
 }
 
+// Заменяет подстроки в файле соответствующие шаблонам
+bool replacement(std::string& textFile, const std::map<std::string, std::string>& replaceValue)
+{
+    bool result(false); // замен не было
+
+    for (const auto& element : replaceValue)
+    {
+        std::regex pattern(element.first);
+        if (std::regex_search(textFile, pattern))
+        {
+            textFile = std::regex_replace(textFile, pattern, element.second);
+
+            result = true; // есть замена
+        }
+    }
+
+    return result;
+}
+
 // Заменяет значения в файлах, очищая список файлов для обработки
 void changeValue(std::vector<pathString>& filesName, const std::map<std::string, std::string>& replaceValue)
 {
@@ -141,10 +161,12 @@ void changeValue(std::vector<pathString>& filesName, const std::map<std::string,
         std::string textFile;
 
         if (!readFile(file, textFile))
-            return;
+            continue;
 
-        // replacement()
-        // rewriteFile()
+        // Если есть замены, перезаписываем файл
+        if (replacement(textFile, replaceValue))
+            // rewriteFile()
+            ;
     }
 }
 
