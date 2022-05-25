@@ -101,5 +101,15 @@ int main()
         return -1;
     }
 
+    // Проверка предоставления шаблонов
+    if (replaceValue.empty())
+    {
+        printInfo("ERROR: There are no values for replacement.");
+
+        std::cin.get();
+        return -1;
+    }
+
+
     return 0;
 }
