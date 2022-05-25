@@ -16,6 +16,7 @@
 #include <map>
 #include <fstream>
 #include <mutex>
+#include <filesystem>
 
 
 
@@ -87,6 +88,15 @@ int main()
     short countThread = getConfig(directoryName, replaceValue);
     if (countThread < 1)
     {
+        std::cin.get();
+        return -1;
+    }
+
+    // Проверка валидности адреса каталога
+    if (!std::filesystem::exists(directoryName))
+    {
+        printInfo("ERROR: The directory does not exist.");
+
         std::cin.get();
         return -1;
     }
