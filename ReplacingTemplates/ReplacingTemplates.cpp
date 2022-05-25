@@ -19,6 +19,9 @@
 #include <filesystem>
 #include <vector>
 #include <regex>
+#include <thread>
+#include <algorithm>
+#include <functional>
 
 
 
@@ -29,7 +32,7 @@ using pathString = std::u8string;
 
 // Мютексы
 std::mutex stdOutMtx; // для работы с std::cout
-std::mutex pathMtx;   // для работы со списком файлов - std::vector<pathString> filesName;
+std::mutex pathMtx;   // для работы со списком файлов - std::vector<pathString> fileNames;
 
 
 // Выводит информацию в консоль
@@ -163,15 +166,15 @@ bool rewriteFile(const pathString& fileName, std::string& textFile)
 }
 
 // Заменяет значения в файлах, очищая список файлов для обработки
-void changeValue(std::vector<pathString>& filesName, const std::map<std::string, std::string>& replaceValue)
+void changeValue(std::vector<pathString>& fileNames, const std::map<std::string, std::string>& replaceValue)
 {
     // Работает пока не закончатся файлы
-    while (!filesName.empty())
+    while (!fileNames.empty())
     {
         pathMtx.lock();
-        pathString file = filesName.back();
+        pathString file = fileNames.back();
         // Файл ушёл в обработку, удаляем его из списка ожидания
-        filesName.pop_back();
+        fileNames.pop_back();
         pathMtx.unlock();
 
         std::string textFile;
@@ -184,7 +187,6 @@ void changeValue(std::vector<pathString>& filesName, const std::map<std::string,
             rewriteFile(file, textFile);
     }
 }
-
 
 int main()
 {
@@ -219,10 +221,19 @@ int main()
     }
 
     // Получаем адреса всех файлов в каталоге
-    std::vector<pathString> filesName;
-    getFiles(directoryName, filesName);
+    std::vector<pathString> fileNames;
+    getFiles(directoryName, fileNames);
 
+    // Замена шаблонов в файлах в многопоточном режиме
+    std::vector<std::thread*> threads(countThread);
+    std::transform(threads.begin(), threads.end(), threads.begin(), [&](std::thread*) {
+        return new std::thread(changeValue, std::ref(fileNames), std::ref(replaceValue));
+    });
 
+    std::for_each(threads.begin(), threads.end(), [](std::thread* thd) { thd->join(); });
+
+    std::cout << "The program has successfully completed." << std::endl;
+    std::cin.get();
 
     return 0;
 }
