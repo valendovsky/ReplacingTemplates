@@ -146,6 +146,22 @@ bool replacement(std::string& textFile, const std::map<std::string, std::string>
     return result;
 }
 
+// Перезаписывает файл
+bool rewriteFile(const pathString& fileName, std::string& textFile)
+{
+    std::ofstream out(fileName);
+    if (!out.is_open())
+    {
+        printInfo("ERROR: Failed to open outFile.");
+
+        return false;
+    }
+
+    out << textFile;
+    out.close();
+    return true;
+}
+
 // Заменяет значения в файлах, очищая список файлов для обработки
 void changeValue(std::vector<pathString>& filesName, const std::map<std::string, std::string>& replaceValue)
 {
@@ -165,8 +181,7 @@ void changeValue(std::vector<pathString>& filesName, const std::map<std::string,
 
         // Если есть замены, перезаписываем файл
         if (replacement(textFile, replaceValue))
-            // rewriteFile()
-            ;
+            rewriteFile(file, textFile);
     }
 }
 
