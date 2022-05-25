@@ -28,6 +28,7 @@ using pathString = std::u8string;
 
 // Мютексы
 std::mutex stdOutMtx; // для работы с std::cout
+std::mutex pathMtx;   // для работы со списком файлов - std::vector<pathString> filesName;
 
 
 // Выводит информацию в консоль
@@ -95,6 +96,55 @@ void getFiles(const std::string& directoryName, std::vector<pathString>& filePat
         {
             filePath.push_back(file.u8string());
         }
+    }
+}
+
+// Считывает содержимое файла в переменную
+// textFile - параметр вывода
+bool readFile(const pathString& fileName, std::string& textFile)
+{
+    std::ifstream in(fileName);
+    if (!in.is_open())
+    {
+        printInfo("ERROR: Failed to open inFile.");
+
+        return false;
+    }
+
+    std::string str;
+    // Чтобы избежать увеличения количества пустых строк в файле
+    std::getline(in, str);
+
+    while (!in.eof())
+    {
+        textFile += (str + '\n');
+        std::getline(in, str);
+    }
+    textFile += str;
+
+    in.close();
+    return true;
+}
+
+// Заменяет значения в файлах, очищая список файлов для обработки
+void changeValue(std::vector<pathString>& filesName, const std::map<std::string, std::string>& replaceValue)
+{
+    // Работает пока не закончатся файлы
+    while (!filesName.empty())
+    {
+        pathMtx.lock();
+        pathString file = filesName.back();
+        // Файл ушёл в обработку, удаляем его из списка ожидания
+        filesName.pop_back();
+        pathMtx.unlock();
+
+        std::string textFile;
+
+        if (!readFile(file, textFile))
+            return;
+
+        // replacement()
+        // rewriteFile()
     }
 }
 
