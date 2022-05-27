@@ -27,6 +27,8 @@ _For example, "<%COLOR%>" is a template, "BLACK" is a replacement. In all files,
 
 **Listing templates and their replacements is not checked by the program for correctness!**
 
+**Templates must be formed according to the rules of std::regex.**
+
 ---
 
 ## Программа осуществляет поиск и замену данных в шаблонах.
@@ -54,3 +56,5 @@ _For example, "<%COLOR%>" is a template, "BLACK" is a replacement. In all files,
 _Например, "<%COLOR%>" - шаблон, "BLACK" - замена. Во всех файлах шаблон изменится на текст замены после работы программы._
 
 **Перечисление шаблонов и их замен не проверяется программой на корректность данных!**
+
+**Шаблоны необходимо формировать по правилам std::regex.**
